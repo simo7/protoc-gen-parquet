@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+option go_package = "./examples";
+
+import "hive_options/hive_options.proto";
+import "parquet_options/parquet_options.proto";
+
+message Person {
+  option (parquet_options.parquet_message_opts).table_name = "person";
+
+  string name = 1;
+  int32 age = 2;
+  repeated string addresses = 3;
+
+  enum PhoneType {
+    MOBILE = 0;
+    HOME = 1;
+    WORK = 2;
+  }
+
+  message PhoneNumber {
+    string number = 1;
+    PhoneType type = 2;
+  }
+
+  repeated PhoneNumber phones = 4;
+
+  int64 entry_timestamp = 5
+      [ (hive_options.hive_field_opts) = {type_override : "timestamp"} ];
+}

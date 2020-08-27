@@ -1,0 +1,14 @@
+message person {
+  optional binary name (UTF8);
+  optional int32 age;
+  optional binary addresses (UTF8);
+  optional group phones (LIST) {
+    repeated group list {
+      optional group element {
+        optional binary number (UTF8);
+        optional binary type (UTF8);
+      }
+    }
+  }
+  optional int96 entry_timestamp;
+}

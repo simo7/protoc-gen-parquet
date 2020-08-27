@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package parquet_options;
+
+option go_package = "./parquet_options";
+
+import "google/protobuf/descriptor.proto";
+
+message ParquetMessageOptions {
+  // As long as table_name is not blank,
+  // a schema is generated for top-level messages in each file.
+  string table_name = 1;
+}
+
+extend google.protobuf.MessageOptions {
+  ParquetMessageOptions parquet_message_opts = 1022;
+}
