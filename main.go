@@ -14,8 +14,9 @@ import (
 )
 
 var (
-	flags      flag.FlagSet
-	noUnsigned = flags.Bool("no_unsigned", false, "use correspondant integer in place of unsigned integer")
+	flags          flag.FlagSet
+	noUnsigned     = flags.Bool("no_unsigned", false, "use correspondant integer in place of unsigned integer")
+	timestampInt96 = flags.Bool("timestamp_int96", false, "use INT96 for Hive timestamps")
 )
 
 var protoToParquet = map[string]string{
@@ -31,7 +32,8 @@ var protoToParquet = map[string]string{
 	"[]byte":    "binary",
 	"enum":      "binary",
 	"message":   "group",
-	"timestamp": "int96",
+	"timestamp": "int64",
+	"int96":     "int96",
 }
 
 func main() {
@@ -97,6 +99,10 @@ func generateField(g *protogen.GeneratedFile, field protoreflect.FieldDescriptor
 	if opts.ProtoReflect().IsValid() {
 		optValue := proto.GetExtension(opts, hiveOpts.E_HiveFieldOpts)
 		protoKind = optValue.(*hiveOpts.HiveFieldOptions).GetTypeOverride()
+	}
+
+	if protoKind == "timestamp" && *timestampInt96 {
+		protoKind = "int96"
 	}
 
 	fieldType := protoToParquet[protoKind]

@@ -10,5 +10,5 @@ message person {
       }
     }
   }
-  optional int96 entry_timestamp;
+  optional int64 entry_timestamp;
 }
