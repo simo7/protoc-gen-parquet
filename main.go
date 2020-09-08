@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"path/filepath"
 	"strings"
@@ -49,18 +50,8 @@ func main() {
 	})
 }
 
-func lineFmt(indentLevel int, args ...string) string {
-	line := strings.Repeat("  ", indentLevel)
-	for i, arg := range args {
-		if arg == "" {
-			continue
-		}
-		if i > 0 && i < len(args)-1 {
-			line += " "
-		}
-		line += arg
-	}
-	return line
+func getIndent(indentLevel int) string {
+	return strings.Repeat("  ", indentLevel)
 }
 
 func generateFile(gen *protogen.Plugin, file *protogen.File) {
@@ -115,7 +106,7 @@ func generateField(g *protogen.GeneratedFile, field protoreflect.FieldDescriptor
 	}
 
 	isRepeatedMessage := false
-	if protoKind == "message" && field.IsList() {
+	if field.IsList() {
 		isRepeatedMessage = true
 	}
 
@@ -128,24 +119,27 @@ func generateField(g *protogen.GeneratedFile, field protoreflect.FieldDescriptor
 	if protoKind == "string" || protoKind == "enum" {
 		annotation = "(UTF8)"
 	}
+
 	if isRepeatedMessage {
-		annotation = "(LIST)"
+		g.P(fmt.Sprintf("%s optional group %s {", getIndent(indentLevel), fieldName))
+	} else {
+		g.P(fmt.Sprintf("%s optional %s %s %s %s",
+			getIndent(indentLevel), fieldType, fieldName, annotation, lineEnd,
+		))
 	}
 
-	g.P(lineFmt(
-		indentLevel,
-		"optional",
-		fieldType,
-		fieldName,
-		annotation,
-		lineEnd,
-	))
-
 	if isRepeatedMessage {
 		indentLevel++
-		g.P(lineFmt(indentLevel, "repeated group list {"))
+		g.P(fmt.Sprintf("%s repeated group list {", getIndent(indentLevel)))
 		indentLevel++
-		g.P(lineFmt(indentLevel, "optional group element {"))
+
+		if protoKind == "message" {
+			g.P(fmt.Sprintf("%s optional group element {", getIndent(indentLevel)))
+		} else {
+			g.P(fmt.Sprintf("%s optional %s %s %s %s",
+				getIndent(indentLevel), fieldType, fieldName, annotation, lineEnd,
+			))
+		}
 	}
 
 	if protoKind == "message" {
@@ -154,11 +148,11 @@ func generateField(g *protogen.GeneratedFile, field protoreflect.FieldDescriptor
 			field := fds.Get(i)
 			generateField(g, field, indentLevel+1)
 		}
-		g.P(lineFmt(indentLevel, "}"))
+		g.P(fmt.Sprintf("%s}", getIndent(indentLevel)))
 	}
 
 	if isRepeatedMessage {
-		g.P(lineFmt(indentLevel-1, "}"))
-		g.P(lineFmt(indentLevel-2, "}"))
+		g.P(fmt.Sprintf("%s}", getIndent(indentLevel-1)))
+		g.P(fmt.Sprintf("%s}", getIndent(indentLevel-2)))
 	}
 }

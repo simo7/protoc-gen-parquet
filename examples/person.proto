@@ -13,14 +13,15 @@ message Person {
   repeated string addresses = 3;
 
   enum PhoneType {
-    MOBILE = 0;
+    UNKNOWN = 0;
     HOME = 1;
-    WORK = 2;
+    MOBILE = 2;
   }
 
   message PhoneNumber {
-    string number = 1;
+    int32 number = 1;
     PhoneType type = 2;
+    repeated string carriers = 3;
   }
 
   repeated PhoneNumber phones = 4;
