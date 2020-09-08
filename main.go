@@ -51,7 +51,7 @@ func main() {
 }
 
 func getIndent(indentLevel int) string {
-	return strings.Repeat("  ", indentLevel)
+	return strings.Repeat(" ", indentLevel*2-1)
 }
 
 func generateFile(gen *protogen.Plugin, file *protogen.File) {
@@ -117,18 +117,11 @@ func generateField(g *protogen.GeneratedFile, field protoreflect.FieldDescriptor
 
 	annotation := ""
 	if protoKind == "string" || protoKind == "enum" {
-		annotation = "(UTF8)"
+		annotation = " (UTF8)"
 	}
 
 	if isRepeatedMessage {
-		g.P(fmt.Sprintf("%s optional group %s {", getIndent(indentLevel), fieldName))
-	} else {
-		g.P(fmt.Sprintf("%s optional %s %s %s %s",
-			getIndent(indentLevel), fieldType, fieldName, annotation, lineEnd,
-		))
-	}
-
-	if isRepeatedMessage {
+		g.P(fmt.Sprintf("%s optional group %s (LIST) {", getIndent(indentLevel), fieldName))
 		indentLevel++
 		g.P(fmt.Sprintf("%s repeated group list {", getIndent(indentLevel)))
 		indentLevel++
@@ -136,10 +129,15 @@ func generateField(g *protogen.GeneratedFile, field protoreflect.FieldDescriptor
 		if protoKind == "message" {
 			g.P(fmt.Sprintf("%s optional group element {", getIndent(indentLevel)))
 		} else {
-			g.P(fmt.Sprintf("%s optional %s %s %s %s",
-				getIndent(indentLevel), fieldType, fieldName, annotation, lineEnd,
+			g.P(fmt.Sprintf("%s optional %s element%s",
+				getIndent(indentLevel), fieldType, annotation+lineEnd,
 			))
 		}
+
+	} else {
+		g.P(fmt.Sprintf("%s optional %s %s%s",
+			getIndent(indentLevel), fieldType, fieldName, annotation+lineEnd,
+		))
 	}
 
 	if protoKind == "message" {
