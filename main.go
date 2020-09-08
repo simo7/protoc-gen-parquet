@@ -51,7 +51,7 @@ func main() {
 }
 
 func getIndent(indentLevel int) string {
-	return strings.Repeat(" ", indentLevel*2-1)
+	return strings.Repeat(" ", indentLevel*2)
 }
 
 func generateFile(gen *protogen.Plugin, file *protogen.File) {
@@ -121,21 +121,21 @@ func generateField(g *protogen.GeneratedFile, field protoreflect.FieldDescriptor
 	}
 
 	if isRepeatedMessage {
-		g.P(fmt.Sprintf("%s optional group %s (LIST) {", getIndent(indentLevel), fieldName))
+		g.P(fmt.Sprintf("%soptional group %s (LIST) {", getIndent(indentLevel), fieldName))
 		indentLevel++
-		g.P(fmt.Sprintf("%s repeated group list {", getIndent(indentLevel)))
+		g.P(fmt.Sprintf("%srepeated group list {", getIndent(indentLevel)))
 		indentLevel++
 
 		if protoKind == "message" {
-			g.P(fmt.Sprintf("%s optional group element {", getIndent(indentLevel)))
+			g.P(fmt.Sprintf("%soptional group element {", getIndent(indentLevel)))
 		} else {
-			g.P(fmt.Sprintf("%s optional %s element%s",
+			g.P(fmt.Sprintf("%soptional %s element%s",
 				getIndent(indentLevel), fieldType, annotation+lineEnd,
 			))
 		}
 
 	} else {
-		g.P(fmt.Sprintf("%s optional %s %s%s",
+		g.P(fmt.Sprintf("%soptional %s %s%s",
 			getIndent(indentLevel), fieldType, fieldName, annotation+lineEnd,
 		))
 	}

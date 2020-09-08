@@ -4,8 +4,8 @@ message person {
   optional group addresses (LIST) {
     repeated group list {
       optional binary element (UTF8);
-   }
- }
+    }
+  }
   optional group phones (LIST) {
     repeated group list {
       optional group element {
@@ -14,10 +14,10 @@ message person {
         optional group carriers (LIST) {
           repeated group list {
             optional binary element (UTF8);
-         }
-       }
-     }
-   }
- }
+          }
+        }
+      }
+    }
+  }
   optional int64 entry_timestamp;
 }
