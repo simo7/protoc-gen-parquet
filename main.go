@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	hiveOpts "github.com/simo7/protoc-gen-gluecatalog/hive_options"
 	parquetOpts "github.com/simo7/protoc-gen-parquet/parquet_options"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
@@ -21,20 +20,30 @@ var (
 )
 
 var protoToParquet = map[string]string{
-	"bool":      "boolean",
-	"int32":     "int32",
-	"int64":     "int64",
-	"uint32":    "uint32",
-	"uint64":    "uint64",
-	"float":     "float",
-	"float64":   "double",
-	"double":    "double",
-	"string":    "binary",
-	"[]byte":    "binary",
-	"enum":      "binary",
-	"message":   "group",
-	"timestamp": "int64",
-	"int96":     "int96",
+	"bool":             "boolean",
+	"int32":            "int32",
+	"int64":            "int64",
+	"uint32":           "uint32",
+	"uint64":           "uint64",
+	"float":            "float",
+	"float64":          "double",
+	"double":           "double",
+	"string":           "binary",
+	"[]byte":           "binary",
+	"enum":             "binary",
+	"message":          "group",
+	"timestamp_millis": "int64",
+	"timestamp_micros": "int64",
+	"timestamp_nanos":  "int64",
+	"int96":            "int96",
+}
+
+var protoAnnotations = map[string]string{
+	"string":           " (UTF8)",
+	"enum":             " (UTF8)",
+	"timestamp_millis": " (TIMESTAMP_MILLIS)",
+	"timestamp_micros": " (TIMESTAMP_MICROS)",
+	"timestamp_nanos":  " (TIMESTAMP_NANOS)",
 }
 
 func main() {
@@ -64,8 +73,8 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) {
 			continue
 		}
 
-		optValue := proto.GetExtension(opts, parquetOpts.E_ParquetMessageOpts)
-		tableName := optValue.(*parquetOpts.ParquetMessageOptions).GetTableName()
+		optValue := proto.GetExtension(opts, parquetOpts.E_MessageOpts)
+		tableName := optValue.(*parquetOpts.MessageOptions).GetTableName()
 
 		if tableName == "" {
 			continue
@@ -88,11 +97,12 @@ func generateField(g *protogen.GeneratedFile, field protoreflect.FieldDescriptor
 
 	opts := field.Options()
 	if opts.ProtoReflect().IsValid() {
-		optValue := proto.GetExtension(opts, hiveOpts.E_HiveFieldOpts)
-		protoKind = optValue.(*hiveOpts.HiveFieldOptions).GetTypeOverride()
+		optValue := proto.GetExtension(opts, parquetOpts.E_FieldOpts)
+		protoKind = optValue.(*parquetOpts.FieldOptions).GetTimestampType().String()
+		protoKind = strings.ToLower(protoKind)
 	}
 
-	if protoKind == "timestamp" && *timestampInt96 {
+	if strings.HasPrefix(protoKind, "timestamp_") && *timestampInt96 {
 		protoKind = "int96"
 	}
 
@@ -115,10 +125,7 @@ func generateField(g *protogen.GeneratedFile, field protoreflect.FieldDescriptor
 		lineEnd = " {"
 	}
 
-	annotation := ""
-	if protoKind == "string" || protoKind == "enum" {
-		annotation = " (UTF8)"
-	}
+	annotation := protoAnnotations[protoKind]
 
 	if isRepeatedMessage {
 		g.P(fmt.Sprintf("%soptional group %s (LIST) {", getIndent(indentLevel), fieldName))

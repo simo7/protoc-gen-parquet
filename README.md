@@ -29,14 +29,13 @@ protoc \
 
 `no_unsigned` (bool): Avoid unsigned integers and use the corresponding intenger instead.
 
-`timestamp_int96` (bool): Fields extended as timestamps using [hive options](https://github.com/simo7/protoc-gen-gluecatalog/blob/master/hive_options/hive_options.proto)
+`timestamp_int96` (bool): Fields extended as timestamps (see `timestamp_type` in [parquet options](parquet_options/parquet_options.proto)
 can be defined as `INT96` instead of `INT64` to ensure compatibility with all Hive and Presto versions.
 
 ## Parquet Annotations
 
 The following annotations are *not* implemented.
 
-- `(TIMESTAMP(MILLIS, true))`, `(TIMESTAMP(MICROS, true))`, `(TIMESTAMP(NANOS, true))`
 - `(DATE)`
 - `(UUID)`
 - `(MAP)`, `(MAP_KEY_VALUE)`

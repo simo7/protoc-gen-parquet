@@ -19,5 +19,5 @@ message person {
       }
     }
   }
-  optional int64 entry_timestamp;
+  optional int64 entry_timestamp (TIMESTAMP_MILLIS);
 }
