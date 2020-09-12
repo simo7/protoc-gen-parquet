@@ -17,9 +17,10 @@ extend google.protobuf.MessageOptions {
 }
 
 enum TimestampType {
-  TIMESTAMP_MILLIS = 0;
-  TIMESTAMP_MICROS = 1;
-  TIMESTAMP_NANOS = 2;
+  UNSPECIFIED = 0;
+  TIMESTAMP_MILLIS = 1;
+  TIMESTAMP_MICROS = 2;
+  TIMESTAMP_NANOS = 3;
 }
 
 message FieldOptions {

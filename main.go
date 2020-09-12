@@ -98,8 +98,10 @@ func generateField(g *protogen.GeneratedFile, field protoreflect.FieldDescriptor
 	opts := field.Options()
 	if opts.ProtoReflect().IsValid() {
 		optValue := proto.GetExtension(opts, parquetOpts.E_FieldOpts)
-		protoKind = optValue.(*parquetOpts.FieldOptions).GetTimestampType().String()
-		protoKind = strings.ToLower(protoKind)
+		timestampType := optValue.(*parquetOpts.FieldOptions).GetTimestampType().String()
+		if timestampType != "UNSPECIFIED" {
+			protoKind = strings.ToLower(timestampType)
+		}
 	}
 
 	if strings.HasPrefix(protoKind, "timestamp_") && *timestampInt96 {
@@ -115,11 +117,6 @@ func generateField(g *protogen.GeneratedFile, field protoreflect.FieldDescriptor
 		fieldType = strings.Replace(fieldType, "uint", "int", 1)
 	}
 
-	isRepeatedMessage := false
-	if field.IsList() {
-		isRepeatedMessage = true
-	}
-
 	lineEnd := ";"
 	if protoKind == "message" {
 		lineEnd = " {"
@@ -127,7 +124,7 @@ func generateField(g *protogen.GeneratedFile, field protoreflect.FieldDescriptor
 
 	annotation := protoAnnotations[protoKind]
 
-	if isRepeatedMessage {
+	if field.IsList() {
 		g.P(fmt.Sprintf("%soptional group %s (LIST) {", getIndent(indentLevel), fieldName))
 		indentLevel++
 		g.P(fmt.Sprintf("%srepeated group list {", getIndent(indentLevel)))
@@ -156,7 +153,7 @@ func generateField(g *protogen.GeneratedFile, field protoreflect.FieldDescriptor
 		g.P(fmt.Sprintf("%s}", getIndent(indentLevel)))
 	}
 
-	if isRepeatedMessage {
+	if field.IsList() {
 		g.P(fmt.Sprintf("%s}", getIndent(indentLevel-1)))
 		g.P(fmt.Sprintf("%s}", getIndent(indentLevel-2)))
 	}
