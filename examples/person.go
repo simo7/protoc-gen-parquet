@@ -1,4 +1,6 @@
-message person {
+package main
+
+const parquetSchema = `message person {
   optional binary name (UTF8);
   optional int32 age;
   optional group addresses (LIST) {
@@ -20,3 +22,4 @@ message person {
     }
   }
   optional int64 entry_timestamp (TIMESTAMP_MILLIS);
+`

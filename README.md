@@ -32,6 +32,9 @@ protoc \
 `timestamp_int96` (bool): Fields extended as timestamps (see `timestamp_type` in [parquet options](parquet_options/parquet_options.proto)
 can be defined as `INT96` instead of `INT64` to ensure compatibility with all Hive and Presto versions.
 
+`go_file` (bool): An additional `.go` file containing the schema as a string constant will be generated. It makes it easier to import
+a versioned schema into a Go application.
+
 ## Parquet Annotations
 
 The following annotations are *not* implemented.

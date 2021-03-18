@@ -17,6 +17,7 @@ var (
 	flags          flag.FlagSet
 	noUnsigned     = flags.Bool("no_unsigned", false, "use correspondant integer in place of unsigned integer")
 	timestampInt96 = flags.Bool("timestamp_int96", false, "use INT96 for Hive timestamps")
+	gofile         = flags.Bool("go_file", false, "output a .go file containing the schema as a string constant")
 )
 
 var protoToParquet = map[string]string{
@@ -80,14 +81,22 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) {
 			continue
 		}
 
-		filename := path + tableName + ".schema"
-		g := gen.NewGeneratedFile(filename, file.GoImportPath)
+		filename := path + tableName
+		g := gen.NewGeneratedFile(filename+".schema", file.GoImportPath)
 
 		g.P("message " + tableName + " {")
 		for _, field := range message.Fields {
 			generateField(g, field.Desc, 1)
 		}
-		g.P("}")
+
+		if *gofile {
+			g2 := gen.NewGeneratedFile(filename+".go", file.GoImportPath)
+			content, _ := g.Content()
+
+			body := fmt.Sprintf("const parquetSchema=`%s`", content)
+			g2.P("package main")
+			g2.P(body)
+		}
 	}
 }
 
