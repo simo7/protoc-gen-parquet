@@ -1,6 +1,6 @@
-package main
+package parquetschema
 
-const parquetSchema = `message person {
+const ParquetSchema = `message person {
   optional binary name (UTF8);
   optional int32 age;
   optional group addresses (LIST) {
@@ -22,4 +22,5 @@ const parquetSchema = `message person {
     }
   }
   optional int64 entry_timestamp (TIMESTAMP_MILLIS);
+}
 `

@@ -88,13 +88,14 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) {
 		for _, field := range message.Fields {
 			generateField(g, field.Desc, 1)
 		}
+		g.P("}")
 
 		if *gofile {
 			g2 := gen.NewGeneratedFile(filename+".go", file.GoImportPath)
 			content, _ := g.Content()
 
-			body := fmt.Sprintf("const parquetSchema=`%s`", content)
-			g2.P("package main")
+			g2.P("package parquetschema")
+			body := fmt.Sprintf("const ParquetSchema=`%s`", content)
 			g2.P(body)
 		}
 	}
