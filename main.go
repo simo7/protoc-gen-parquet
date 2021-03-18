@@ -88,6 +88,7 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) {
 		for _, field := range message.Fields {
 			generateField(g, field.Desc, 1)
 		}
+		g.P("}")
 
 		if *gofile {
 			g2 := gen.NewGeneratedFile(filename+".go", file.GoImportPath)
