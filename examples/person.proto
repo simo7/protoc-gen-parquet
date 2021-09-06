@@ -1,8 +1,11 @@
 syntax = "proto3";
 
-option go_package = "./examples";
+package examples;
+
+option go_package = "github.com/simo7/protoc-gen-parquet/examples";
 
 import "parquet_options/parquet_options.proto";
+import "google/protobuf/timestamp.proto";
 
 message Person {
   option (parquet_options.message_opts).table_name = "person";
@@ -14,7 +17,7 @@ message Person {
   enum PhoneType {
     UNKNOWN = 0;
     HOME = 1;
-    MOBILE = 2;
+    WORK = 2;
   }
 
   message PhoneNumber {
@@ -25,6 +28,12 @@ message Person {
 
   repeated PhoneNumber phones = 4;
 
-  int64 entry_timestamp = 5
+  int64 created_at = 5
       [ (parquet_options.field_opts).timestamp_type = TIMESTAMP_MILLIS ];
+
+  google.protobuf.Timestamp updated_at = 6
+      [ (parquet_options.field_opts).timestamp_type = TIMESTAMP_MILLIS ];
+
+  google.protobuf.Timestamp generated_at = 7
+      [ (parquet_options.field_opts).timestamp_type = TIMESTAMP_MICROS ];
 }

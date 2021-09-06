@@ -94,7 +94,7 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) {
 			g2 := gen.NewGeneratedFile(filename+".go", file.GoImportPath)
 			content, _ := g.Content()
 
-			g2.P("package parquetschema")
+			g2.P("package " + file.GoPackageName)
 			body := fmt.Sprintf("const ParquetSchema=`%s`", content)
 			g2.P(body)
 		}
@@ -130,6 +130,13 @@ func generateField(g *protogen.GeneratedFile, field protoreflect.FieldDescriptor
 	lineEnd := ";"
 	if protoKind == "message" {
 		lineEnd = " {"
+
+		fd := field.Message().Fields().Get(0)
+		if isProtoTimestamp(fd) {
+			g.P(fmt.Sprintf("%soptional int64 %s (TIMESTAMP_NANOS);",
+				getIndent(indentLevel), string(field.Name())))
+			return
+		}
 	}
 
 	annotation := protoAnnotations[protoKind]
@@ -157,8 +164,8 @@ func generateField(g *protogen.GeneratedFile, field protoreflect.FieldDescriptor
 	if protoKind == "message" {
 		fds := field.Message().Fields()
 		for i := 0; i < fds.Len(); i++ {
-			field := fds.Get(i)
-			generateField(g, field, indentLevel+1)
+			fd := fds.Get(i)
+			generateField(g, fd, indentLevel+1)
 		}
 		g.P(fmt.Sprintf("%s}", getIndent(indentLevel)))
 	}
@@ -167,4 +174,8 @@ func generateField(g *protogen.GeneratedFile, field protoreflect.FieldDescriptor
 		g.P(fmt.Sprintf("%s}", getIndent(indentLevel-1)))
 		g.P(fmt.Sprintf("%s}", getIndent(indentLevel-2)))
 	}
+}
+
+func isProtoTimestamp(fd protoreflect.FieldDescriptor) bool {
+	return strings.HasPrefix(string(fd.FullName()), "google.protobuf.Timestamp.")
 }

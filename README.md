@@ -20,8 +20,10 @@ export PATH=$PWD/bin:$PATH
 
 ```bash
 protoc \
-    --parquet_out=no_unsigned=true:./ \
+    --parquet_out=no_unsigned=true,go_file=true:./ \
     --parquet_opt=paths=source_relative \
+    --go_opt=paths=source_relative \
+    --go_out=./ \
     examples/person.proto
 ```
 
@@ -43,6 +45,14 @@ The following annotations are *not* implemented.
 - `(UUID)`
 - `(MAP)`, `(MAP_KEY_VALUE)`
 - `(STRING)`  (all UTF8 by default)
+
+## Well-known Protobuf types
+
+Reference: https://developers.google.com/protocol-buffers/docs/reference/google.protobuf.
+
+The following types are supported:
+
+- [x] `google.protobuf.Timestamp`
 
 ## Compatibility
 
