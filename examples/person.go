@@ -1,4 +1,4 @@
-package parquetschema
+package examples
 
 const ParquetSchema = `message person {
   optional binary name (UTF8);
@@ -21,6 +21,8 @@ const ParquetSchema = `message person {
       }
     }
   }
-  optional int64 entry_timestamp (TIMESTAMP_MILLIS);
+  optional int64 created_at (TIMESTAMP_MILLIS);
+  optional int64 updated_at (TIMESTAMP_MILLIS);
+  optional int64 generated_at (TIMESTAMP_MICROS);
 }
 `
