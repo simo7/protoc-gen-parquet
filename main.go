@@ -131,11 +131,13 @@ func generateField(g *protogen.GeneratedFile, field protoreflect.FieldDescriptor
 	if protoKind == "message" {
 		lineEnd = " {"
 
-		fd := field.Message().Fields().Get(0)
-		if isProtoTimestamp(fd) {
-			g.P(fmt.Sprintf("%soptional int64 %s (TIMESTAMP_NANOS);",
-				getIndent(indentLevel), string(field.Name())))
-			return
+		fds := field.Message().Fields()
+		if fds.Len() > 0 {
+			if isProtoTimestamp(fds.Get(0)) {
+				g.P(fmt.Sprintf("%soptional int64 %s (TIMESTAMP_NANOS);",
+					getIndent(indentLevel), string(field.Name())))
+				return
+			}
 		}
 	}
 
