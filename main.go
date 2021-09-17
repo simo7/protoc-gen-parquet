@@ -95,7 +95,7 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) {
 			content, _ := g.Content()
 
 			g2.P("package " + file.GoPackageName)
-			body := fmt.Sprintf("const %s=`%s`", tableName, content)
+			body := fmt.Sprintf("const %s_parquet_schema=`%s`", strings.Title(tableName), content)
 			g2.P(body)
 		}
 	}
