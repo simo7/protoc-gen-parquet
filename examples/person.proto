@@ -37,3 +37,11 @@ message Person {
   google.protobuf.Timestamp generated_at = 7
       [ (parquet_options.field_opts).timestamp_type = TIMESTAMP_MICROS ];
 }
+
+message Address {
+  option (parquet_options.message_opts).table_name = "address";
+
+  string street = 1;
+  string number = 2;
+  int32 zip_code = 3;
+}

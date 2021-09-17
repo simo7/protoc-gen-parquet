@@ -1,6 +1,6 @@
 package examples
 
-const ParquetSchema = `message person {
+const person = `message person {
   optional binary name (UTF8);
   optional int32 age;
   optional group addresses (LIST) {
