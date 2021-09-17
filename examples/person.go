@@ -1,6 +1,6 @@
 package examples
 
-const person = `message person {
+const PARQUET_SCHEMA_PERSON = `message person {
   optional binary name (UTF8);
   optional int32 age;
   optional group addresses (LIST) {

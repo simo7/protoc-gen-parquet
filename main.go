@@ -6,6 +6,7 @@ import (
 	"log"
 	"path/filepath"
 	"strings"
+	"unicode"
 
 	parquetOpts "github.com/simo7/protoc-gen-parquet/parquet_options"
 	"google.golang.org/protobuf/compiler/protogen"
@@ -95,7 +96,7 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) {
 			content, _ := g.Content()
 
 			g2.P("package " + file.GoPackageName)
-			body := fmt.Sprintf("const %s=`%s`", tableName, content)
+			body := fmt.Sprintf("const PARQUET_SCHEMA_%s=`%s`", ToUpperSnakeCase(tableName), content)
 			g2.P(body)
 		}
 	}
@@ -180,4 +181,25 @@ func generateField(g *protogen.GeneratedFile, field protoreflect.FieldDescriptor
 
 func isProtoTimestamp(fd protoreflect.FieldDescriptor) bool {
 	return strings.HasPrefix(string(fd.FullName()), "google.protobuf.Timestamp.")
+}
+
+func ToUpperSnakeCase(s string) string {
+	var res = make([]rune, 0, len(s))
+	var p = '_'
+	for i, r := range s {
+		if !unicode.IsLetter(r) && !unicode.IsDigit(r) {
+			res = append(res, '_')
+		} else if unicode.IsUpper(r) && i > 0 {
+			if unicode.IsLetter(p) && !unicode.IsUpper(p) || unicode.IsDigit(p) {
+				res = append(res, '_', unicode.ToLower(r))
+			} else {
+				res = append(res, unicode.ToLower(r))
+			}
+		} else {
+			res = append(res, unicode.ToLower(r))
+		}
+
+		p = r
+	}
+	return strings.ToUpper(string(res))
 }
