@@ -18,6 +18,8 @@ export PATH=$PWD/bin:$PATH
 
 ## Usage
 
+Generate parquet schema:
+
 ```bash
 protoc \
     --parquet_out=no_unsigned=true,go_file=true:./ \
@@ -25,6 +27,15 @@ protoc \
     --go_opt=paths=source_relative \
     --go_out=./ \
     examples/person.proto
+```
+
+Re-generate parquet_options stubs:
+
+```bash
+protoc \
+    --go_opt=paths=source_relative \
+    --go_out=./ \
+    parquet_options/parquet_options.proto
 ```
 
 ## Flags

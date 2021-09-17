@@ -13,7 +13,7 @@ message MessageOptions {
 }
 
 extend google.protobuf.MessageOptions {
-  MessageOptions message_opts = 1022;
+  MessageOptions message_opts = 1023;
 }
 
 enum TimestampType {
@@ -28,5 +28,5 @@ message FieldOptions {
 }
 
 extend google.protobuf.FieldOptions {
-  FieldOptions field_opts = 1022;
+  FieldOptions field_opts = 1023;
 }
