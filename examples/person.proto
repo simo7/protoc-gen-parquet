@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package examples;
 
-option go_package = "github.com/simo7/protoc-gen-parquet/examples";
+option go_package = "github.com/reemote/protoc-gen-parquet/examples";
 
 import "parquet_options/parquet_options.proto";
 import "google/protobuf/timestamp.proto";

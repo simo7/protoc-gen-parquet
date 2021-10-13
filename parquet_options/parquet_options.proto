@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package parquet_options;
 
-option go_package = "github.com/simo7/protoc-gen-parquet/parquet_options";
+option go_package = "github.com/reemote/protoc-gen-parquet/parquet_options";
 
 import "google/protobuf/descriptor.proto";
 

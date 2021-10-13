@@ -8,7 +8,7 @@ package examples
 
 import (
 	proto "github.com/golang/protobuf/proto"
-	_ "github.com/simo7/protoc-gen-parquet/parquet_options"
+	_ "github.com/reemote/protoc-gen-parquet/parquet_options"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"

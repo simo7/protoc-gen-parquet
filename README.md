@@ -5,7 +5,7 @@ A protoc plugin that generates parquet schemas from protobuf files. See [example
 ## Installation
 
 ```bash
-go get github.com/simo7/protoc-gen-parquet
+go get github.com/reemote/protoc-gen-parquet
 ```
 
 Alternatively clone the repo and build the plugin:

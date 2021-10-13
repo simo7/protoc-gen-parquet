@@ -8,7 +8,7 @@ import (
 	"strings"
 	"unicode"
 
-	parquetOpts "github.com/simo7/protoc-gen-parquet/parquet_options"
+	parquetOpts "github.com/reemote/protoc-gen-parquet/parquet_options"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"

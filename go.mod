@@ -1,4 +1,4 @@
-module github.com/simo7/protoc-gen-parquet
+module github.com/reemote/protoc-gen-parquet
 
 go 1.14
 
