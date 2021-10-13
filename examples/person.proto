@@ -36,6 +36,12 @@ message Person {
 
   google.protobuf.Timestamp generated_at = 7
       [ (parquet_options.field_opts).timestamp_type = TIMESTAMP_MICROS ];
+
+  message EmptyMessage { // this will not be added to the parquet schema
+  }
+  
+  EmptyMessage empty_message = 8;
+  repeated EmptyMessage empty_messages = 9;
 }
 
 message Address {

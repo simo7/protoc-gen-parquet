@@ -139,6 +139,8 @@ func generateField(g *protogen.GeneratedFile, field protoreflect.FieldDescriptor
 					getIndent(indentLevel), string(field.Name())))
 				return
 			}
+		} else {
+			return
 		}
 	}
 
