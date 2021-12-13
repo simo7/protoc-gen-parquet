@@ -16,9 +16,12 @@ import (
 
 var (
 	flags          flag.FlagSet
-	noUnsigned     = flags.Bool("no_unsigned", false, "use correspondant integer in place of unsigned integer")
-	timestampInt96 = flags.Bool("timestamp_int96", false, "use INT96 for Hive timestamps")
-	gofile         = flags.Bool("go_file", false, "output a .go file containing the schema as a string constant")
+	noUnsigned             = flags.Bool("no_unsigned", false, "use correspondant integer in place of unsigned integer")
+	timestampInt96         = flags.Bool("timestamp_int96", false, "use INT96 for Hive timestamps")
+	gofile                 = flags.Bool("go_file", false, "output a .go file containing the schema as a string constant")
+	outputMessages         = flags.String("output_messages", "", "output semicolon-separated message objects, instead of just the ones with a table name annotation")
+	maxRecursionLevel      = flags.Int("max_recursion", 0, "max recursion depth, disabled by default")
+	outputMessagesList     []string
 )
 
 var protoToParquet = map[string]string{
@@ -59,6 +62,7 @@ func main() {
 	protogen.Options{
 		ParamFunc: flags.Set,
 	}.Run(func(gen *protogen.Plugin) error {
+		outputMessagesList = strings.Split(*outputMessages,";")
 		for _, f := range gen.Files {
 			if f.Generate {
 				generateFile(gen, f)
@@ -76,17 +80,30 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) {
 	path, _ := filepath.Split(file.GeneratedFilenamePrefix)
 
 	for _, message := range file.Messages {
-		opts := message.Desc.Options()
-
-		if !opts.ProtoReflect().IsValid() {
-			continue
+		var tableName string
+		messageName := string(message.Desc.Name())
+		found := false
+		for _, match := range outputMessagesList {
+			if match == messageName {
+				found = true
+				break
+			}
 		}
+		if found {
+			tableName = strings.ToLower(messageName)
+		} else {
 
-		optValue := proto.GetExtension(opts, parquetOpts.E_MessageOpts)
-		tableName := optValue.(*parquetOpts.MessageOptions).GetTableName()
+			opts := message.Desc.Options()
 
-		if tableName == "" {
-			continue
+			if !opts.ProtoReflect().IsValid() {
+				continue
+			}
+
+			optValue := proto.GetExtension(opts, parquetOpts.E_MessageOpts)
+			tableName = optValue.(*parquetOpts.MessageOptions).GetTableName()
+			if tableName == "" {
+				continue
+			}
 		}
 
 		filename := path + tableName
@@ -94,7 +111,8 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) {
 
 		g.P("message " + tableName + " {")
 		for _, field := range message.Fields {
-			generateField(g, field.Desc, 1)
+			fieldMap := map[protoreflect.FieldDescriptor]bool{}
+			generateField(g, field.Desc, 1, fieldMap, 0)
 		}
 		g.P("}")
 
@@ -109,8 +127,18 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) {
 	}
 }
 
-func generateField(g *protogen.GeneratedFile, field protoreflect.FieldDescriptor, indentLevel int) {
+func generateField(g *protogen.GeneratedFile, field protoreflect.FieldDescriptor, indentLevel int, fieldMap map[protoreflect.FieldDescriptor]bool, recursionLevel int) {
+
 	fieldName := string(field.Name())
+	if _, ok := fieldMap[field]; ok {
+		recursionLevel++
+		if (*maxRecursionLevel != 0) && (recursionLevel >= *maxRecursionLevel) {
+			return
+		}
+	} else {
+		fieldMap[field] = true
+	}
+
 	protoKind := field.Kind().String()
 
 	opts := field.Options()
@@ -175,7 +203,7 @@ func generateField(g *protogen.GeneratedFile, field protoreflect.FieldDescriptor
 		fds := field.Message().Fields()
 		for i := 0; i < fds.Len(); i++ {
 			fd := fds.Get(i)
-			generateField(g, fd, indentLevel+1)
+			generateField(g, fd, indentLevel+1, fieldMap, recursionLevel)
 		}
 		g.P(fmt.Sprintf("%s}", getIndent(indentLevel)))
 	}

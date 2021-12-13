@@ -22,7 +22,7 @@ Generate parquet schema:
 
 ```bash
 protoc \
-    --parquet_out=no_unsigned=true,go_file=true:./ \
+    --parquet_out=no_unsigned=true,go_file=true,max_recursion=5,output_messages=Person;Address:./ \
     --parquet_opt=paths=source_relative \
     --go_opt=paths=source_relative \
     --go_out=./ \
@@ -47,6 +47,10 @@ can be defined as `INT96` instead of `INT64` to ensure compatibility with all Hi
 
 `go_file` (bool): An additional `.go` file containing the schema as a string constant will be generated. It makes it easier to import
 a versioned schema into a Go application.
+
+`max_recursion` (int): An optional recursion level - a number of times the schema will repeat the same element.
+
+`output_messages` (string): Output semicolon-separated message objects, instead of just the ones with a table name annotation
 
 ## Parquet Annotations
 
