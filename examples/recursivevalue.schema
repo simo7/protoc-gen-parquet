@@ -1,0 +1,8 @@
+message recursivevalue {
+  optional binary string_value (UTF8);
+  optional boolean bool_value;
+  optional int64 int_value;
+  optional double double_value;
+  optional binary array_value (JSON);
+  optional binary bytes_value;
+}

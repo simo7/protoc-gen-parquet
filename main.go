@@ -8,20 +8,20 @@ import (
 	"strings"
 	"unicode"
 
-	parquetOpts "github.com/simo7/protoc-gen-parquet/parquet_options"
+	parquetOpts "github.com/atoulme/protoc-gen-parquet/parquet_options"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 var (
-	flags          flag.FlagSet
-	noUnsigned             = flags.Bool("no_unsigned", false, "use correspondant integer in place of unsigned integer")
-	timestampInt96         = flags.Bool("timestamp_int96", false, "use INT96 for Hive timestamps")
-	gofile                 = flags.Bool("go_file", false, "output a .go file containing the schema as a string constant")
-	outputMessages         = flags.String("output_messages", "", "output semicolon-separated message objects, instead of just the ones with a table name annotation")
-	maxRecursionLevel      = flags.Int("max_recursion", 0, "max recursion depth, disabled by default")
-	outputMessagesList     []string
+	flags              flag.FlagSet
+	noUnsigned         = flags.Bool("no_unsigned", false, "use correspondant integer in place of unsigned integer")
+	timestampInt96     = flags.Bool("timestamp_int96", false, "use INT96 for Hive timestamps")
+	gofile             = flags.Bool("go_file", false, "output a .go file containing the schema as a string constant")
+	outputMessages     = flags.String("output_messages", "", "output semicolon-separated message objects, instead of just the ones with a table name annotation")
+	maxRecursionLevel  = flags.Int("max_recursion", 0, "max recursion depth, disabled by default")
+	outputMessagesList []string
 )
 
 var protoToParquet = map[string]string{
@@ -62,7 +62,7 @@ func main() {
 	protogen.Options{
 		ParamFunc: flags.Set,
 	}.Run(func(gen *protogen.Plugin) error {
-		outputMessagesList = strings.Split(*outputMessages,";")
+		outputMessagesList = strings.Split(*outputMessages, ";")
 		for _, f := range gen.Files {
 			if f.Generate {
 				generateFile(gen, f)
@@ -142,12 +142,15 @@ func generateField(g *protogen.GeneratedFile, field protoreflect.FieldDescriptor
 	protoKind := field.Kind().String()
 
 	opts := field.Options()
+	isJson := false
 	if opts.ProtoReflect().IsValid() {
 		optValue := proto.GetExtension(opts, parquetOpts.E_FieldOpts)
-		timestampType := optValue.(*parquetOpts.FieldOptions).GetTimestampType().String()
+		parquetOptions := optValue.(*parquetOpts.FieldOptions)
+		timestampType := parquetOptions.GetTimestampType().String()
 		if timestampType != "UNSPECIFIED" {
 			protoKind = strings.ToLower(timestampType)
 		}
+		isJson = parquetOptions.GetIsJson()
 	}
 
 	if strings.HasPrefix(protoKind, "timestamp_") && *timestampInt96 {
@@ -164,7 +167,7 @@ func generateField(g *protogen.GeneratedFile, field protoreflect.FieldDescriptor
 	}
 
 	lineEnd := ";"
-	if protoKind == "message" {
+	if protoKind == "message" && !isJson {
 		lineEnd = " {"
 
 		fds := field.Message().Fields()
@@ -178,8 +181,12 @@ func generateField(g *protogen.GeneratedFile, field protoreflect.FieldDescriptor
 	}
 
 	annotation := protoAnnotations[protoKind]
+	if isJson {
+		annotation += " (JSON)"
+		fieldType = "binary"
+	}
 
-	if field.IsList() {
+	if field.IsList() && !isJson {
 		g.P(fmt.Sprintf("%soptional group %s (LIST) {", getIndent(indentLevel), fieldName))
 		indentLevel++
 		g.P(fmt.Sprintf("%srepeated group list {", getIndent(indentLevel)))
@@ -199,7 +206,7 @@ func generateField(g *protogen.GeneratedFile, field protoreflect.FieldDescriptor
 		))
 	}
 
-	if protoKind == "message" {
+	if protoKind == "message" && !isJson {
 		fds := field.Message().Fields()
 		for i := 0; i < fds.Len(); i++ {
 			fd := fds.Get(i)

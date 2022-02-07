@@ -1,0 +1,18 @@
+syntax = "proto3";
+import "parquet_options/parquet_options.proto";
+option go_package = "github.com/atoulme/protoc-gen-parquet/examples";
+
+message RecursiveValue {
+  oneof value {
+    string string_value = 1;
+    bool bool_value = 2;
+    int64 int_value = 3;
+    double double_value = 4;
+    ArrayValue array_value = 5 [(parquet_options.field_opts).is_json = true];
+    bytes bytes_value = 7;
+  }
+}
+
+message ArrayValue {
+  repeated RecursiveValue values = 1;
+}

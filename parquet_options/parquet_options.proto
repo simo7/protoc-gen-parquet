@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package parquet_options;
 
-option go_package = "github.com/simo7/protoc-gen-parquet/parquet_options";
+option go_package = "github.com/atoulme/protoc-gen-parquet/parquet_options";
 
 import "google/protobuf/descriptor.proto";
 
@@ -25,6 +25,7 @@ enum TimestampType {
 
 message FieldOptions {
   TimestampType timestamp_type = 1;
+  bool is_json = 2;
 }
 
 extend google.protobuf.FieldOptions {
